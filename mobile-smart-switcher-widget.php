@@ -21,8 +21,8 @@
 
 class MobileSmartSwitcherWidget extends WP_Widget {
 
-function MobileSmartSwitcherWidget() {
-	parent::WP_Widget(false, $name='Mobile Smart Manual Switcher');
+function __construct() {
+	parent::__construct(false, $name='Mobile Smart Manual Switcher');
 }
 
 /**

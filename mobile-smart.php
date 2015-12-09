@@ -2,7 +2,7 @@
 /*
 Plugin Name: Mobile Smart
 Plugin URI: http://www.dansmart.co.uk/downloads/
-Version: v1.3.8
+Version: v1.3.10
 Author: <a href="http://www.dansmart.co.uk/">Dan Smart</a>
 Description: Mobile Smart contains helper tools for mobile devices +  switching mobile themes. <a href="/wp-admin/options-general.php?page=mobile-smart.php">Settings</a>
              determination of mobile device type or tier in CSS and PHP code, using
@@ -252,7 +252,14 @@ if (!class_exists("MobileSmart"))
     {
       $options = $this->getAdminOptions();
       
-      $themes = get_themes();
+      if (is_multisite()) {
+        $args = array('allowed'=>'site', 'errors'=>false, 'blog_id'=>0);
+      }
+      else {
+        $args = null;
+      }
+      
+      $themes = wp_get_themes($args);
       
       $current_tab = (isset($_GET['tab']) ? $_GET['tab'] : 1);
       
@@ -271,17 +278,17 @@ if (!class_exists("MobileSmart"))
             $status_messages[] = $this->adminSetOptionFromCheckbox($options, 'enable_theme_switching', __('Theme switching', MOBILESMART_DOMAIN));
             
             // Get choice of mobile theme
-            if ($options['mobile_theme'] != $_POST['theme'])
+            if ($this->getOption($options, 'mobile_theme') != $_POST['theme'])
             {
               $theme_name = $_POST['theme'];
-
-              if (array_key_exists($theme_name, $themes))
-              {
-                $options['mobile_theme'] = $themes[$theme_name]['Template'];
-                $options['mobile_theme_stylesheet'] = $themes[$theme_name]['Stylesheet'];
-
-                $status_messages[] = array('updated', __('Mobile theme updated to: ', MOBILESMART_DOMAIN) . $_POST['theme']);
-              }
+              
+              $theme = wp_get_theme($theme_name);
+        
+              $options['mobile_theme'] = $theme->stylesheet;
+              $options['mobile_theme_template'] = $theme['Template'];
+              $options['mobile_theme_stylesheet'] = $theme->stylesheet;
+        
+              $status_message = array('updated', __('Mobile theme updated to: ', MOBILESMART_DOMAIN) . $theme['Name']);
             }
             
             // Enable / Disable switching for tablets
@@ -393,11 +400,11 @@ if (!class_exists("MobileSmart"))
               }
             ?>
             <h3 class="nav-tab-wrapper">
-              <a href="<?php echo add_query_arg('tab', 1); ?>" class="nav-tab <?php display_active_tab(1, $current_tab); ?>">Mobile Theme</a>
-              <a href="<?php echo add_query_arg('tab', 2); ?>" class="nav-tab <?php display_active_tab(2, $current_tab); ?>">Domain Switching (PRO)</a>
-              <a href="<?php echo add_query_arg('tab', 3); ?>" class="nav-tab <?php display_active_tab(3, $current_tab); ?>">Manual Switching</a>
-              <a href="<?php echo add_query_arg('tab', 4); ?>" class="nav-tab <?php display_active_tab(4, $current_tab); ?>">Transcoding</a>
-              <a href="<?php echo add_query_arg('tab', 5); ?>" class="nav-tab <?php display_active_tab(5, $current_tab); ?>">Mobile Pages (PRO)</a>
+              <a href="<?php echo esc_url(add_query_arg('tab', 1)); ?>" class="nav-tab <?php display_active_tab(1, $current_tab); ?>">Mobile Theme</a>
+              <a href="<?php echo esc_url(add_query_arg('tab', 2)); ?>" class="nav-tab <?php display_active_tab(2, $current_tab); ?>">Domain Switching (PRO)</a>
+              <a href="<?php echo esc_url(add_query_arg('tab', 3)); ?>" class="nav-tab <?php display_active_tab(3, $current_tab); ?>">Manual Switching</a>
+              <a href="<?php echo esc_url(add_query_arg('tab', 4)); ?>" class="nav-tab <?php display_active_tab(4, $current_tab); ?>">Transcoding</a>
+              <a href="<?php echo esc_url(add_query_arg('tab', 5)); ?>" class="nav-tab <?php display_active_tab(5, $current_tab); ?>">Mobile Pages (PRO)</a>
             </h3>
             <form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
             <?php
@@ -435,17 +442,19 @@ if (!class_exists("MobileSmart"))
       <p>Enable switching via user agent detection:</p>
       <label for="enable_theme_switching">Enable <input type="checkbox" name="enable_theme_switching" id="enable_theme_switching" <?php if ($options['enable_theme_switching']) { echo "checked"; } ?>/></label>
       
-      <p>Choose the mobile theme that will be displayed when a mobile device is detected.</p>
+      <fieldset>      
         <label for="theme">Mobile theme: <select id="theme" name="theme">
-            <?php
+            <?php            
               foreach ($themes as $theme_name => $theme)
               {
                 ?>
-                <option value="<?php echo $theme_name; ?>" <?php if ($theme['Template'] == $options['mobile_theme']) { echo "selected"; } ?>><?php echo $theme['Name']; ?></option>
+                <option value="<?php echo $theme_name; ?>" <?php if ($theme->stylesheet == $this->getOption($options, 'mobile_theme')) { echo "selected"; } ?>><?php echo $theme['Name']; ?></option>
                 <?php
               }
             ?>
           </select></label>
+      </fieldset>
+
       
       <h4>Tablets</h4>
       <p>
@@ -739,9 +748,16 @@ if (!class_exists("MobileSmart"))
       if ($options['enable_theme_switching'] == true)
       { 
         // if is a mobile device or is mobile due to cookie switching
-        if ($this->switcher_isMobile())
+        $switch_theme = apply_filters('mobile_smart_switch_theme', $this->switcher_isMobile());
+        if ($switch_theme)
         { 
-          $theme = $options['mobile_theme'];
+          $theme = $this->getOption($options, 'mobile_theme_template');
+          
+          // if we've not got the theme here, we're out of sync between Mobile Smart versions, but we can recover
+          if (!$theme) {
+            $theme_template = wp_get_theme($this->getOption($options, 'mobile_theme_stylesheet'));
+            $theme = $theme_template['Template'];
+          }
         }
       }
 
@@ -758,15 +774,19 @@ if (!class_exists("MobileSmart"))
       // get options
       $options = $this->getAdminOptions();
 
+      // get options
+      $options = $this->getAdminOptions();
+
       // if theme switching enabled
-      if ($options['enable_theme_switching'] == true)
+      if ($this->getOption($options, 'enable_theme_switching') == true && !is_admin())
       {
         // if is a mobile device or is mobile due to cookie switching
-        if ($this->switcher_isMobile())
-        {
-          $theme = $options['mobile_theme_stylesheet'];
+        $switch_theme = apply_filters('mobile_smart_switch_theme', $this->switcher_isMobile());
+        if ($switch_theme) {
+          $theme = $this->getOption($options, 'mobile_theme_stylesheet');
         }
       }
+
 
       return $theme;
     }
@@ -882,9 +902,9 @@ if (!class_exists("MobileSmart"))
       <!-- START MobileSmart - Switcher - http://www.dansmart.co.uk/ -->
       <div id="mobilesmart_switcher">
         <?php if ($is_mobile) : ?>
-          <a href="<?php echo $this->get_switcherLink(MOBILESMART_SWITCHER_DESKTOP_STR); ?>"><?php _e('Switch to desktop version', MOBILESMART_DOMAIN); ?></a>
+          <a href="<?php echo esc_url($this->get_switcherLink(MOBILESMART_SWITCHER_DESKTOP_STR)); ?>"><?php _e('Switch to desktop version', MOBILESMART_DOMAIN); ?></a>
         <?php else : ?>
-          <a href="<?php echo $this->get_switcherLink(MOBILESMART_SWITCHER_MOBILE_STR); ?>"><?php _e('Switch to mobile version', MOBILESMART_DOMAIN); ?></a>
+          <a href="<?php echo esc_url($this->get_switcherLink(MOBILESMART_SWITCHER_MOBILE_STR)); ?>"><?php _e('Switch to mobile version', MOBILESMART_DOMAIN); ?></a>
         <?php endif; ?>
       </div>
       <!-- END MobileSmart - Switcher - http://www.dansmart.co.uk/ -->
