@@ -123,8 +123,7 @@ if (!class_exists("MobileSmart"))
     // -------------------------------------------------------------------------
     // Method: Constructor
     // -------------------------------------------------------------------------
-    // PHP 4 version
-    function MobileSmart()
+    function __construct()
     {
       // init parent constructor
       parent::uagent_info();
@@ -348,12 +347,14 @@ if (!class_exists("MobileSmart"))
             padding: 10px; margin: 10px;
             background-color: #efefef;
             float: right;
-            width: 200px;
+            width: 20%;
           }
           
           #mobilesmart_infobox .subsection {
             border: 1px solid #cdcdcd;
             padding: 10px; margin: 10px 0;
+            width: 70%;
+            float: left;
           }
         </style>
           <h2>Mobile Smart</h2>
