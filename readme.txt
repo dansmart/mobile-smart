@@ -3,7 +3,7 @@ Contributors: dolby_uk
 Donate link: http://www.mobile-smart.co.uk/
 Tags: iphone, mobile, theme switcher, mobile theme, mobile device, series 60, ipad, blackberry, android, tablet
 Requires at least: 3.1
-Tested up to: 4.4
+Tested up to: 4.5
 Stable tag: trunk
 
 The Mobile Smart plugin allows your Wordpress site to switch your theme if a user visits it using a mobile device,
@@ -179,6 +179,9 @@ for a good example of a theme that is compatible with XHTML-MP.
 == Changelog ==
 
 = 1.3.13
+- Fix admin screen on mobile was showing mobile theme instead of desktop theme
+
+= 1.3.12
 - Fix CSS error in admin
 
 = 1.3.11
