@@ -178,6 +178,12 @@ for a good example of a theme that is compatible with XHTML-MP.
 
 == Changelog ==
 
+= 1.3.13
+- Fix CSS error in admin
+
+= 1.3.11
+- Fix errors in dependencies brought across from Mobile Smart Pro - compatible and tested with WordPress 4.4
+
 = 1.3.10
 - Fix debug warnings for deprecated functions
 

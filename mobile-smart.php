@@ -2,7 +2,7 @@
 /*
 Plugin Name: Mobile Smart
 Plugin URI: http://www.dansmart.co.uk/downloads/
-Version: v1.3.10
+Version: v1.3.12
 Author: <a href="http://www.dansmart.co.uk/">Dan Smart</a>
 Description: Mobile Smart contains helper tools for mobile devices +  switching mobile themes. <a href="/wp-admin/options-general.php?page=mobile-smart.php">Settings</a>
              determination of mobile device type or tier in CSS and PHP code, using
@@ -182,6 +182,21 @@ if (!class_exists("MobileSmart"))
       return $this->admin_options;
     }
     
+    /**
+     * shorthand function to get option value by key
+     * 
+     * @access public
+     * @param mixed $option_key
+     * @return void
+     */
+    public function getOption($options, $option_key) {      
+      if ($options && isset($options[$option_key])) {
+        return $options[$option_key];
+      }
+      
+      return false;
+    }
+    
     
     /**
      * Set meta data option from a checkbox in the admin
@@ -284,10 +299,10 @@ if (!class_exists("MobileSmart"))
               $theme = wp_get_theme($theme_name);
         
               $options['mobile_theme'] = $theme->stylesheet;
-              $options['mobile_theme_template'] = $theme['Template'];
+              $options['mobile_theme_template'] = $theme->template;
               $options['mobile_theme_stylesheet'] = $theme->stylesheet;
         
-              $status_message = array('updated', __('Mobile theme updated to: ', MOBILESMART_DOMAIN) . $theme['Name']);
+              $status_messages[] = array('updated', __('Mobile theme updated to: ', MOBILESMART_DOMAIN) . $theme->stylesheet);
             }
             
             // Enable / Disable switching for tablets
@@ -325,7 +340,7 @@ if (!class_exists("MobileSmart"))
           ?>
             <div class="updated">
               <?php foreach ($status_messages as $message) : ?>
-                <p><strong><?php echo $message[1] ?></strong></p>
+                <p><strong><?php echo isset($message[1]) ? $message[1] : ''; ?></strong></p>
               <?php endforeach; ?>
             </div>
           <?php
@@ -353,6 +368,9 @@ if (!class_exists("MobileSmart"))
           #mobilesmart_infobox .subsection {
             border: 1px solid #cdcdcd;
             padding: 10px; margin: 10px 0;
+          }
+          
+          #mobilesmart_main_container {
             width: 70%;
             float: left;
           }
@@ -570,7 +588,7 @@ if (!class_exists("MobileSmart"))
     function displayProNotice()
     {
       ?>
-      <p>Coming soon: Mobile Smart PRO - sign up to the newsletter to get news of when it will be released.</p>
+      <p><a href="http://codecanyon.net/item/mobile-smart-pro/3671362?ref=dansmart" target="_top">Buy Mobile Smart PRO</a> from CodeCanyon with tonnes of added features</p>
       <?php
     }
 
@@ -757,6 +775,7 @@ if (!class_exists("MobileSmart"))
           // if we've not got the theme here, we're out of sync between Mobile Smart versions, but we can recover
           if (!$theme) {
             $theme_template = wp_get_theme($this->getOption($options, 'mobile_theme_stylesheet'));
+            
             $theme = $theme_template['Template'];
           }
         }
@@ -1058,7 +1077,7 @@ if (!class_exists("MobileSmart"))
        $options = $this->getAdminOptions();
        
        // only process the content if we're in mobile mode
-      if (!$this->switcher_isMobile() || !$options['enable_image_transcoding'])
+      if (!$this->switcher_isMobile() || !isset($options['enable_image_transcoding']) || !$options['enable_image_transcoding'])
         return $the_content;
      
        preg_match_all("/\<img.* src=((?:'[^']*')|(?:\"[^\"]*\")).*\>/Usi", $the_content, $images);
