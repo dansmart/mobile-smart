@@ -1,9 +1,9 @@
 === Plugin Name ===
 Contributors: dolby_uk
 Donate link: http://www.mobile-smart.co.uk/
-Tags: iphone, mobile, theme switcher, mobile theme, mobile device, series 60, ipad, blackberry, android, tablet
+Tags: iphone, mobile, theme switcher, mobile theme, mobile device, ipad, blackberry, android, tablet
 Requires at least: 3.1
-Tested up to: 4.5
+Tested up to: 4.6
 Stable tag: trunk
 
 The Mobile Smart plugin allows your Wordpress site to switch your theme if a user visits it using a mobile device,
@@ -22,7 +22,7 @@ Mobile Smart (http://www.mobile-smart.co.uk/), using trusty detection from the M
 
 See the Frequently Asked Questions for guidance on how to use the plugin.
 
-Device support includes iPhone, iPad, Android, Blackberry, Windows Phone 6 & 7, Symbian, and many more.
+Device support includes iPhone, iPad, Android, Android tablet, Samsung, Motorola, Blackberry, Windows Phone 6 & 7, Symbian, and many more.
 
 = Mobile Smart Pro =
 
@@ -172,11 +172,14 @@ Please email me with details of the device that is not yet supported by Mobile S
 
 = Where can I get a mobile theme from? =
 
-Try the Mobile Smart boilerplat theme if you're a developer. Also check out the Wordpress Mobile Pack
+Try the Mobile Smart boilerplate theme if you're a developer. Also check out the Wordpress Mobile Pack
 for a good example of a theme that is compatible with XHTML-MP.
 
 
 == Changelog ==
+
+= 1.3.16
+- Bug fix: latest version of mdetect.php didn't set tablet version properly. Thanks to Jesse Heap (https://github.com/jesseheap) for this fix.
 
 = 1.3.15
 - Security: Updated timthumb.php to the latest version
