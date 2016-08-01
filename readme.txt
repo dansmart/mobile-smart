@@ -178,6 +178,13 @@ for a good example of a theme that is compatible with XHTML-MP.
 
 == Changelog ==
 
+= 1.3.15
+- Security: Updated timthumb.php to the latest version
+
+= 1.3.14
+- Update MobileESP mobile detection library - updated the Mobile ESP detection code. New support for: Windows Phone 10, Firefox OS, Ubuntu Mobile OS, Sailfish, Tizen TV, WebOS TV. Removed support for Opera Android Phone and Tablet. Updated DetectTierIphone(), DetectTierTablet(), DetectSmartphone(). See http://blog.mobileesp.com/?p=425
+- Remove deprecated function call to get_bloginfo()
+
 = 1.3.13
 - Fix admin screen on mobile was showing mobile theme instead of desktop theme
 
